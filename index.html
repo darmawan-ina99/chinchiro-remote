@@ -100,6 +100,7 @@ for (let i=0;i<3;i++){
   row.addEventListener("click", e => {
     const t = e.target.closest(".fc"); if(!t) return;
     d[i] = +t.dataset.v;
+    if (selMode !== "custom") { selMode = "custom"; paintModes(); }
     [...row.children].forEach(c=>c.classList.toggle("on", c===t));
   });
   $("diceBox").appendChild(row);
@@ -108,7 +109,7 @@ for (let i=0;i<3;i++){
 // preset cepat
 [["4-5-6 shigoro",[4,5,6]],["6-6-6",[6,6,6]],["5-5-5",[5,5,5]],["1-1-1 pinzoro",[1,1,1]],["1-2-3 (kalah)",[1,2,3]],["2-2-2",[2,2,2]]].forEach(([txt,vals])=>{
   const b=document.createElement("button"); b.className="pre"; b.textContent=txt;
-  b.onclick=()=>{ selMode="custom"; d=[...vals]; paintModes(); paintDice(); toast("preset "+txt+" — tekan SET"); };
+  b.onclick=()=>{ selMode="custom"; d=[...vals]; paintModes(); paintDice(); sendSet(); };
   $("presets").appendChild(b);
 });
 
@@ -133,6 +134,7 @@ async function refresh(){
     const j = await r.json();
     $("dot").className="dot ok"; $("conntxt").textContent="online";
     $("statMode").textContent = MODE_TXT[j.mode] || j.mode;
+    $("statMode").style.color = j.mode==="off" ? "#f85149" : "#3fb950";
     $("statDice").innerHTML = j.mode==="off" ? "" :
       [j.d1,j.d2,j.d3].map(v=>v>0?FACE[v-1]:"&#x1F518;").join(" ");
     $("statUpd").textContent = "update terakhir: " + (j.updated_at ? new Date(j.updated_at).toLocaleTimeString("id-ID") : "-");
@@ -140,7 +142,7 @@ async function refresh(){
 }
 setInterval(refresh, 3000); refresh();
 
-$("setBtn").onclick = async ()=>{
+async function sendSet(){
   const pin = $("pin").value.trim();
   if(!pin){ toast("isi PIN dulu", true); return; }
   $("setBtn").textContent = "MENGIRIM..."; $("setBtn").disabled = true;
@@ -148,11 +150,15 @@ $("setBtn").onclick = async ()=>{
     const r = await fetch(API, { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ pin, mode: selMode, d1: d[0], d2: d[1], d3: d[2] }) });
     const j = await r.json();
-    if(r.ok && j.ok){ toast("TERSIMPAN: " + MODE_TXT[selMode]); refresh(); }
+    if(r.ok && j.ok){
+      toast(selMode==="off" ? "TERSIMPAN: DADU NORMAL (OFF)" : "TERSIMPAN: " + MODE_TXT[selMode] + " " + d.map(v=>v>0?v:"?").join("-"));
+      refresh();
+    }
     else toast(j.error || "gagal", true);
   }catch(_e){ toast("jaringan bermasalah", true); }
   $("setBtn").textContent = "SET DADU"; $("setBtn").disabled = false;
-};
+}
+$("setBtn").onclick = sendSet;
 </script>
 </body>
 </html>
