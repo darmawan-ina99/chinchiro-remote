@@ -114,7 +114,12 @@ for (let i=0;i<3;i++){
 });
 
 // pilihan mode
-document.querySelectorAll(".mode").forEach(m=>m.onclick=()=>{ selMode=m.dataset.mode; paintModes(); sendSet(); });
+document.querySelectorAll(".mode").forEach(m=>m.onclick=()=>{
+  selMode=m.dataset.mode;
+  if(selMode==="shigoro") d=[4,5,6];
+  if(selMode==="pinzoro") d=[1,1,1];
+  paintModes(); paintDice(); sendSet();
+});
 
 function paintModes(){ document.querySelectorAll(".mode").forEach(m=>m.classList.toggle("on", m.dataset.mode===selMode)); }
 function paintDice(){
@@ -135,8 +140,11 @@ async function refresh(){
     $("dot").className="dot ok"; $("conntxt").textContent="online";
     $("statMode").textContent = MODE_TXT[j.mode] || j.mode;
     $("statMode").style.color = j.mode==="off" ? "#f85149" : "#3fb950";
+    let dd=[j.d1,j.d2,j.d3];
+    if(j.mode==="shigoro") dd=[4,5,6];
+    if(j.mode==="pinzoro") dd=[1,1,1];
     $("statDice").innerHTML = j.mode==="off" ? "" :
-      [j.d1,j.d2,j.d3].map(v=>v>0?FACE[v-1]:"&#x1F518;").join(" ");
+      dd.map(v=>v>0?FACE[v-1]:"&#x1F518;").join(" ");
     $("statUpd").textContent = "update terakhir: " + (j.updated_at ? new Date(j.updated_at).toLocaleTimeString("id-ID") : "-");
   }catch(_e){ $("dot").className="dot"; $("conntxt").textContent="offline"; }
 }
