@@ -114,7 +114,7 @@ for (let i=0;i<3;i++){
 });
 
 // pilihan mode
-document.querySelectorAll(".mode").forEach(m=>m.onclick=()=>{ selMode=m.dataset.mode; paintModes(); });
+document.querySelectorAll(".mode").forEach(m=>m.onclick=()=>{ selMode=m.dataset.mode; paintModes(); sendSet(); });
 
 function paintModes(){ document.querySelectorAll(".mode").forEach(m=>m.classList.toggle("on", m.dataset.mode===selMode)); }
 function paintDice(){
